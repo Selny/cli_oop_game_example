@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 
 namespace ForgottenWarriors {
 
@@ -7,6 +8,7 @@ namespace ForgottenWarriors {
         private Character c1;
         private Character c2;
         private int turn = 0;
+        public List<int> logs = new List<int>(){0};
 
         public Game(string title, ref Character c1, ref Character c2) {
             Console.Title = title;
@@ -17,15 +19,16 @@ namespace ForgottenWarriors {
         }
 
         public override string ToString () => $"{c1}\t{c2}\nHP: {c1.hp}\t\t\tHP: {c2.hp}";
-        public void Input() {
-            int od;
+        public void Input(ref Game game) {
             if (turn % 2 == 0) {
-                od = c1.Input();
-                c2.hp -= od;
+                logs.Add(c1.Input(ref game));
+                c2.hp -= logs[^1];
+                System.Console.WriteLine($"Attack: {logs[^1]}");
             }
             else {
-                od = c2.Input();
-                c1.hp -= od;
+                logs.Add(c2.Input(ref game));
+                c1.hp -= logs[^1];
+                System.Console.WriteLine($"Attack: {logs[^1]}");
             }
             turn++;
         }
@@ -36,7 +39,18 @@ namespace ForgottenWarriors {
             else if (c2.hp <= 0) {
                 System.Console.WriteLine($"{c1} won the battle!");
             }
+
             return c1.hp > 0 && c2.hp > 0;
+        }
+
+        public void show_logs() {
+            int i = 1;
+            foreach(var damage in logs) {
+                if (i % 2 == 0) System.Console.WriteLine(c1);
+                else System.Console.WriteLine(c2);
+                if (i!=0)System.Console.WriteLine(damage);
+                i++;
+            }
         }
 
     }
@@ -48,19 +62,22 @@ namespace ForgottenWarriors {
         protected int damage;
         // protected int mana;
 
-        public abstract int Input();
-        public abstract int Attack();
+        public abstract int Input(ref Game g);
+        public virtual int Attack() {
+            System.Console.WriteLine($"Damage: {damage}");
+            return damage;
+        }
 
     }
 
     class SadKnight : Character {
 
-        private int maxDamage = 60;
+        private int maxDamage = 40;
         
         public SadKnight(string name) {
             this.name = name;
             hp = 50;
-            damage = 20;
+            damage = 30;
         }
 
         public override string ToString() => $"{name} the Sad Knight";
@@ -74,16 +91,16 @@ namespace ForgottenWarriors {
         public int CryAttack() {
             System.Console.WriteLine(@"Self damage -20. Damage +50");
             hp -= 20;
-            return 50;
+            return 60;
         }
-        public override int Input() {
+        public override int Input(ref Game game) {
             System.Console.WriteLine("\nChoose a skill:\nQ > Attack\nW > CryAttack");
             var option = Console.ReadKey(true).Key;
             if (option == ConsoleKey.Q) return Attack();
             else if (option == ConsoleKey.W) return CryAttack();
             else {
                 System.Console.WriteLine("Invalid option");
-                return Input();
+                return Input(ref game);
             }
         }
 
@@ -93,48 +110,93 @@ namespace ForgottenWarriors {
 
         public Pharmacist(string name) {
             this.name = name;
-            hp = 80;
-            damage = 30;
+            hp = 60;
+            damage = 17;
         }
 
         public override string ToString() => $"{name} the Pharmacist";
 
-        public override int Attack() {
-            System.Console.WriteLine($"Damage: {damage}");
-            return damage;
-        }
         public int Happyness() {
             System.Console.WriteLine("HP +20");
-            hp += 20;
+            hp += 15;
             return 0;
         }
 
-        public override int Input() {
-            System.Console.WriteLine("Choose a skill:\nQ > Attack\nW > Happyness");
+        public override int Input(ref Game game) {
+            System.Console.WriteLine("\nChoose a skill:\nQ > Attack\nW > Happyness");
             var option = Console.ReadKey(true).Key;
             if (option == ConsoleKey.Q) return Attack();
             else if (option == ConsoleKey.W) return Happyness();
             else {
-                return Input();
+                return Input(ref game);
             }
         }
     }
 
+    class Wanderer : Character {
+
+        public Wanderer(string name) {
+            this.name = name;
+            hp = 65;
+            damage = 20;
+        }
+
+        public override string ToString() => $"{name} the Wanderer";
+
+        public int ReverseAttack(ref Game g) {
+            System.Console.WriteLine($"Reverse Attack!\nDamage: {g.logs[^1]/2}");
+            hp += g.logs[^1] / 2;
+            return g.logs[^1] / 2;
+        }
+
+        public override int Input(ref Game game) {
+            System.Console.WriteLine("\nChoose a skill:\nQ > Attack\nW > Reverse Attack");
+            var option = Console.ReadKey(true).Key;
+            if (option == ConsoleKey.Q) return Attack();
+            else if (option == ConsoleKey.W) return ReverseAttack(ref game);
+            else {
+                return Input(ref game);
+            }
+        }
+        
+
+    }
 
     internal class Program {
 
         public static void Main(String[] args) {
 
-            Character sk = new SadKnight("Leo");
-            Character p = new Pharmacist("Skaia");
+            Character[] characters1 = { 
+                new SadKnight("Neutral Leo"), 
+                new Pharmacist("Neutral Skaia"),
+                new Wanderer("Neutral Leah"),
+            };
 
-            Game game = new Game("Forgotten Warriors", ref sk, ref p);
+            Character[] characters2 = { 
+                new SadKnight("Dark Leo"), 
+                new Pharmacist("Dark Skaia"),
+                new Wanderer("Dark Leah"),
+            };
+
+            System.Console.WriteLine("1)SadKnight\n2)Pharmacist\n3)Wanderer\n");
+            int p1, p2;
+            System.Console.Write("Choose player 1: ");
+            p1 = int.Parse(Console.ReadKey(true).KeyChar.ToString());
+            System.Console.WriteLine($" {characters1[p1-1]}");
+            System.Console.Write("Choose player 2: ");
+            p2 = int.Parse(Console.ReadKey(true).KeyChar.ToString());
+            System.Console.WriteLine($" characters2[p2-1]");
+            Console.Clear();
+
+            Game game = new Game("Forgotten Warriors", ref characters1[p1-1], ref characters2[p2-1]);
 
             while (game.Running()) {
                 System.Console.WriteLine(game);
-                game.Input();
+                game.Input(ref game);
                 Console.Clear();
             }
+
+            game.show_logs();
 
         }
 
