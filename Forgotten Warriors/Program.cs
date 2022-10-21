@@ -76,7 +76,7 @@ namespace ForgottenWarriors {
         
         public SadKnight(string name) {
             this.name = name;
-            hp = 50;
+            hp = 75;
             damage = 30;
         }
 
@@ -162,6 +162,48 @@ namespace ForgottenWarriors {
 
     }
 
+    class Viper : Character {
+
+        private int poisionDamage = 0;
+        private int duration = 3;
+        private bool active = false;
+
+        public Viper(string name) {
+            this.name = name;
+            damage = 17;
+            hp = 73;
+        }
+
+        public override string ToString() => $"{name} the Viper";
+
+        public int PoisionAttack(){
+            System.Console.WriteLine($"Poision Attack!\nDamage{poisionDamage}\nDuration: 3 rounds");
+            active = true;
+            return 15;
+        }
+
+        public override int Input(ref Game game) {
+            System.Console.WriteLine("\nChoose a skill:\nQ > Attack\nW > Poision Attack");
+            var option = Console.ReadKey(true).Key;
+            if (active) {
+                poisionDamage = 10;
+                duration--;
+            }
+            if (duration == 0) {
+                poisionDamage = 0;
+                active = false;
+                duration = 3;
+            }
+            if (option == ConsoleKey.Q) return Attack() + poisionDamage;
+            else if (option == ConsoleKey.W) return PoisionAttack();
+            else {
+                return Input(ref game);
+            }
+        }
+
+
+    }
+
     internal class Program {
 
         public static void Main(String[] args) {
@@ -170,15 +212,17 @@ namespace ForgottenWarriors {
                 new SadKnight("Neutral Leo"), 
                 new Pharmacist("Neutral Skaia"),
                 new Wanderer("Neutral Leah"),
+                new Viper("Neutral Toxic")
             };
 
             Character[] characters2 = { 
                 new SadKnight("Dark Leo"), 
                 new Pharmacist("Dark Skaia"),
                 new Wanderer("Dark Leah"),
+                new Viper("Dark Toxic")
             };
 
-            System.Console.WriteLine("1)SadKnight\n2)Pharmacist\n3)Wanderer\n");
+            System.Console.WriteLine("1)SadKnight\n2)Pharmacist\n3)Wanderer\n4)Viper\n");
             int p1, p2;
             System.Console.Write("Choose player 1: ");
             p1 = int.Parse(Console.ReadKey(true).KeyChar.ToString());
