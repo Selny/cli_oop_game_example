@@ -5,20 +5,76 @@ namespace ForgottenWarriors {
 
     class Game {
 
-        private Character c1;
-        private Character c2;
-        private int turn = 0;
+        private Character c1 = null!;
+        private Character c2 = null!;
+        public int GameMode;
+        public int turn = 0;
         public List<int> logs = new List<int>(){0};
 
-        public Game(string title, ref Character c1, ref Character c2) {
-            Console.Title = title;
-            //Console.BackgroundColor = ConsoleColor.Black;
+        public override string ToString () => $"{c1}\t{c2}\nHP: {c1.hp}\t\t\tHP: {c2.hp}";
+
+        public void Start() {
+
+            Console.Title = "Forgotten Warriors";
             Console.ForegroundColor = ConsoleColor.Red;
-            this.c1 = c1;
-            this.c2 = c2;
+            System.Console.WriteLine("Choose game mode:\n1) PvP\n2) Player vs Bot\n3) Bot vs Bot");
+            GameMode = int.Parse(Console.ReadKey(true).KeyChar.ToString());
+            Console.Clear();
+            
+            Character[] characters1 = { 
+                new SadKnight("Neutral Leo"), 
+                new Pharmacist("Neutral Skaia"),
+                new Wanderer("Neutral Leah"),
+                new Viper("Neutral Toxic")
+            };
+
+            Character[] characters2 = { 
+                new SadKnight("Dark Leo"), 
+                new Pharmacist("Dark Skaia"),
+                new Wanderer("Dark Leah"),
+                new Viper("Dark Toxic")
+            };
+            
+            int p1, p2;
+            System.Console.WriteLine("1)SadKnight\n2)Pharmacist\n3)Wanderer\n4)Viper\n");
+
+            if (GameMode == 1) {
+                System.Console.Write("Choose player 1: ");
+                p1 = int.Parse(Console.ReadKey(true).KeyChar.ToString());
+                System.Console.WriteLine($" {characters1[p1-1]}");
+                System.Console.Write("Choose player 2: ");
+                p2 = int.Parse(Console.ReadKey(true).KeyChar.ToString());
+                System.Console.WriteLine($" characters2[p2-1]");
+                Console.Clear();
+            }
+
+            else if (GameMode == 2) {
+                System.Console.Write("Choose player 1: ");
+                p1 = int.Parse(Console.ReadKey(true).KeyChar.ToString());
+                System.Console.WriteLine($" {characters1[p1-1]}");
+                System.Console.Write("Choose player 2: ");
+                Random r = new Random();
+                p2 = r.Next(1, 5);
+                System.Console.WriteLine($" characters2[p2-1]");
+                Console.Clear();
+            }
+            else {
+                Random r = new Random();
+                System.Console.Write("Choose player 1: ");
+                p1 = r.Next(1, 5);
+                System.Console.WriteLine($" {characters1[p1-1]}");
+                System.Console.Write("Choose player 2: ");
+                p2 = r.Next(1, 5);
+                System.Console.WriteLine($" characters2[p2-1]");
+                Console.Clear();
+            }
+
+
+            this.c1 = characters1[p1-1];
+            this.c2 = characters2[p2-1];
+
         }
 
-        public override string ToString () => $"{c1}\t{c2}\nHP: {c1.hp}\t\t\tHP: {c2.hp}";
         public void Input(ref Game game) {
             if (turn % 2 == 0) {
                 logs.Add(c1.Input(ref game));
@@ -30,9 +86,10 @@ namespace ForgottenWarriors {
                 c1.hp -= logs[^1];
                 System.Console.WriteLine($"Attack: {logs[^1]}");
             }
+            System.Threading.Thread.Sleep(2000);
             turn++;
         }
-        public bool Running() {
+        public bool isRunning() {
             if (c1.hp <= 0) {
                 System.Console.WriteLine($"{c2} won the battle!");
             }
@@ -95,7 +152,13 @@ namespace ForgottenWarriors {
         }
         public override int Input(ref Game game) {
             System.Console.WriteLine("\nChoose a skill:\nQ > Attack\nW > CryAttack");
-            var option = Console.ReadKey(true).Key;
+            ConsoleKey option;
+            if ((game.GameMode == 2 && game.turn % 2 == 1) || game.GameMode == 3) {
+                Random r = new Random();
+                if (r.Next(0, 1) == 0) option = ConsoleKey.Q;
+                else option = ConsoleKey.W;
+            }
+            else option = Console.ReadKey(true).Key;
             if (option == ConsoleKey.Q) return Attack();
             else if (option == ConsoleKey.W) return CryAttack();
             else {
@@ -124,7 +187,13 @@ namespace ForgottenWarriors {
 
         public override int Input(ref Game game) {
             System.Console.WriteLine("\nChoose a skill:\nQ > Attack\nW > Happyness");
-            var option = Console.ReadKey(true).Key;
+            ConsoleKey option;
+            if ((game.GameMode == 2 && game.turn % 2 == 1) || game.GameMode == 3) {
+                Random r = new Random();
+                if (r.Next(0, 1) == 0) option = ConsoleKey.Q;
+                else option = ConsoleKey.W;
+            }
+            else option = Console.ReadKey(true).Key;
             if (option == ConsoleKey.Q) return Attack();
             else if (option == ConsoleKey.W) return Happyness();
             else {
@@ -151,7 +220,13 @@ namespace ForgottenWarriors {
 
         public override int Input(ref Game game) {
             System.Console.WriteLine("\nChoose a skill:\nQ > Attack\nW > Reverse Attack");
-            var option = Console.ReadKey(true).Key;
+            ConsoleKey option;
+            if ((game.GameMode == 2 && game.turn % 2 == 1) || game.GameMode == 3) {
+                Random r = new Random();
+                if (r.Next(0, 1) == 0) option = ConsoleKey.Q;
+                else option = ConsoleKey.W;
+            }
+            else option = Console.ReadKey(true).Key;
             if (option == ConsoleKey.Q) return Attack();
             else if (option == ConsoleKey.W) return ReverseAttack(ref game);
             else {
@@ -184,7 +259,13 @@ namespace ForgottenWarriors {
 
         public override int Input(ref Game game) {
             System.Console.WriteLine("\nChoose a skill:\nQ > Attack\nW > Poision Attack");
-            var option = Console.ReadKey(true).Key;
+            ConsoleKey option;
+            if ((game.GameMode == 2 && game.turn % 2 == 1) || game.GameMode == 3) {
+                Random r = new Random();
+                if (r.Next(0, 1) == 0) option = ConsoleKey.Q;
+                else option = ConsoleKey.W;
+            }
+            else option = Console.ReadKey(true).Key;
             if (active) {
                 poisionDamage = 10;
                 duration--;
@@ -208,39 +289,15 @@ namespace ForgottenWarriors {
 
         public static void Main(String[] args) {
 
-            Character[] characters1 = { 
-                new SadKnight("Neutral Leo"), 
-                new Pharmacist("Neutral Skaia"),
-                new Wanderer("Neutral Leah"),
-                new Viper("Neutral Toxic")
-            };
+            Game game = new();
 
-            Character[] characters2 = { 
-                new SadKnight("Dark Leo"), 
-                new Pharmacist("Dark Skaia"),
-                new Wanderer("Dark Leah"),
-                new Viper("Dark Toxic")
-            };
+            game.Start();
 
-            System.Console.WriteLine("1)SadKnight\n2)Pharmacist\n3)Wanderer\n4)Viper\n");
-            int p1, p2;
-            System.Console.Write("Choose player 1: ");
-            p1 = int.Parse(Console.ReadKey(true).KeyChar.ToString());
-            System.Console.WriteLine($" {characters1[p1-1]}");
-            System.Console.Write("Choose player 2: ");
-            p2 = int.Parse(Console.ReadKey(true).KeyChar.ToString());
-            System.Console.WriteLine($" characters2[p2-1]");
-            Console.Clear();
-
-            Game game = new Game("Forgotten Warriors", ref characters1[p1-1], ref characters2[p2-1]);
-
-            while (game.Running()) {
+            while (game.isRunning()) {
                 System.Console.WriteLine(game);
                 game.Input(ref game);
                 Console.Clear();
             }
-
-            game.show_logs();
 
         }
 
